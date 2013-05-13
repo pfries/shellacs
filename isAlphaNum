@@ -1,0 +1,15 @@
+#!/bin/sh
+
+isAlphaNum()
+{
+    # validates arg: returns 0 if all upper+lower+digits, otherwise 1
+
+    # remove the non-alphanumeric chars (there shouldn't be any)
+    compressed="$(echo $1 | sed -e 's/[^[:alnum:]]//g')"
+
+    if [[ $compressed != $input ]] ; then
+        return 1
+    else
+        return 0
+    fi
+}

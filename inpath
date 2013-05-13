@@ -1,0 +1,52 @@
+#!/bin/sh
+# input - Given a cmd name or path, checks if its findable and executable 
+
+in_path()
+{
+    # Given a command and the PATH, try to find the command. Returns 
+    # 0 if found and executable, 1 if not. 
+    cmd=$1          path=$2     retval=1
+    oldIFS=$IFS     IFS=":" # for iterating $path
+
+    for directory in $path
+    do
+        if [ -x $directory/$cmd ] ; then
+            retval=0 # found executable $cmd in PATH $directory
+        fi
+    done
+    IFS=$oldIFS
+    return $retval
+}
+
+lookup()
+{
+    var=$1
+
+    if [ "$var" != "" ] ; then
+        # handle full paths. Use POSIX compliant splicing
+        # to check for first char = "/"
+        if [ "${var%${var#?}}" = "/" ] ; then 
+            if [ ! -x $var ] ; then
+                return 1 # not executable
+            fi
+        elif ! in_path $var $PATH ; then
+            return 2 # not found in path either
+        fi
+    fi
+}
+
+if [ $# -ne 1 ] ; then
+    echo "Usage: $0 command" >&2 ; exit 1
+fi
+
+lookup "$1"
+case $? in
+    0 ) echo "$1 found in PATH"
+        ;;
+    1 ) echo "$1 not executable"
+        ;;
+    2 ) echo "$1 not found in PATH"
+        ;;
+esac
+
+exit 0
